@@ -1,6 +1,6 @@
 package Kvizi.Kviz1;
 
-public class kviz1_12 {
+public class kviz1_13 {
     public static boolean jePrastevilo(int n) {
         for (int i = 2; i < n; i++) {
             if (n % i == 0) {

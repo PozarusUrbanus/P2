@@ -1,21 +1,19 @@
 package Kvizi.Kviz1;
 
 public class kviz1_11 {
-    public static void pretvoriVDesetisko(String n, int b) {
+    public static String pretvoriVDesetisko(String n, int b) {
 
-        if (n.contains("8")) {
-            System.out.printf("Število %d ni število v osmiškem sistemu (števka 8)", Integer.parseInt(n));
-        } else if (n.contains("9")) {
-            System.out.printf("Število %d ni število v osmiškem sistemu (števka 9)", Integer.parseInt(n));
-        } else {
-            int deset = Integer.parseInt(n, b);
-            System.out.printf("%d(%d) = %d(10)", Integer.parseInt(n), b, deset);
+        if (n.contains("2") && b == 2) {
+            return ("Napaka pri pretvorbi sistema - števka 2");
+        } else if (n.contains("G") && b == 16) {
+            return ("Napaka pri pretvorbi sistema - števka G");
         }
+        return (n + "(" + b + ")=" + Integer.parseInt(n, b) + "(10)");
     }
-
 
     public static void main(String[] args) {
-        pretvoriVDesetisko("FF", 16);
-    }
 
+        System.out.println(pretvoriVDesetisko("101010", 2));
+
+    }
 }

@@ -7,10 +7,7 @@ public class kviz1_8 {
                 return false;
             }
         }
-        if (n > 0) {
-            return true;
-        } else
-            return false;
+        return n > 0;
     }
 
     public static void main(String[] args) {
