@@ -1,4 +1,4 @@
-package Vaje;
+package Kvizi.Vaje;
 
 public class Vaja1 {
     //1. PRAVOKOTNIKI a

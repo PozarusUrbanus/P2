@@ -18,7 +18,6 @@ public class kviz1_15 {
                 }
             }
         }
-
         return unija;
     }
 

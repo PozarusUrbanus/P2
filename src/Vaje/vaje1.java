@@ -1,7 +1,5 @@
 package Vaje;
 
-import static Vaje.Vaja1.trikotnik;
-
 public class vaje1 {
     static void pravokotnikStevilVrstice (int sirina, int visina) {
         for (int i = 1; i <= visina; i++) {
