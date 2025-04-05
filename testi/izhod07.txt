@@ -1,0 +1,1 @@
+Napaka: Stevilo ladij ne sme biti negativno.

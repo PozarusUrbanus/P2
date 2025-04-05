@@ -1,0 +1,12 @@
+# # # # # # # # # # # # # # # # # # # # # # #
+# p p                 # p p p             p #
+# t t                 # t t t             t #
+# t t                 # t t t             t #
+# t t                 # t     p           t #
+# t t       p   p     # t     t           t #
+#   t       t   t     #       t           t #
+#           t   t     #       t             #
+#     p     t p t     #     p               #
+#     t       t t     #     t               #
+#     t       t       #     t               #
+# # # # # # # # # # # # # # # # # # # # # # #

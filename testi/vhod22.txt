@@ -1,0 +1,1 @@
+simulacija viri/vhod.txt viri/poteze.txt
