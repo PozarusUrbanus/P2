@@ -146,21 +146,6 @@ public class vaje3 {
             0b0010010000011000000000000011110000100000001000000010000000111100L
     };
 
-    public static void izpisi64bit (long kodaZnaka){
-        for (int i = 7; i >= 0; i--) {
-            for (int j = 7; j >= 0; j--) {
-                long maska = 1L<<(i * 8 + j);
-                long rezultat = kodaZnaka & maska;
-                if (rezultat != 0) {
-                    System.out.print(crnaPika);
-                }else {
-                    System.out.print(belaPika);
-                }
-            }
-            System.out.println();
-        }
-    }
-
     public static void izpisi64bit(long[] nizZnakov) {
         for (int i = 7; i >= 0; i--) {
             for (int k = 0; k < nizZnakov.length; k++) {
@@ -235,7 +220,7 @@ public class vaje3 {
 
          */
         //izpisi64bit(0b0001100000011000000110000001100000011000000000000001100000011000L);
-        izpisi64bit("Če programiram, še bolj uživam");
+        //izpisi64bit("Če programiram, še bolj uživam");
 
     }
 
