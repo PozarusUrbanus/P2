@@ -1,4 +1,4 @@
-package DN09;
+//package DN09;
 
 import java.io.File;
 import java.util.*;
@@ -148,7 +148,10 @@ public class DN09 {
             //IZPISOVANJE
             if (ukaz.equals("izpisi")) izpisi();
             if (ukaz.equals("najboljObremenjena")) izpisNajboljObremenjenePostaje(Integer.parseInt(args[2]));
-
+            if (ukaz.equals("premik")) {
+                int n = Integer.parseInt(args[2]);
+                izpisiPoNPremikih(n);
+            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -245,6 +248,100 @@ public class DN09 {
         }
     }
     //3.IZPIS
+    static void naslednjeStanje(){
+        for (Linija l : linije) {
+            if (l == null) continue;
+
+            Postaja[] postaje = l.getPostaje();
+            Avtobus[] avtobusi = l.getAvtobusi();
+
+            for (Avtobus a : avtobusi) {
+                if (a == null || a.getTrenutnaPostaja() == null) continue;
+
+                int index = -1;
+                // Poišči trenutno pozicijo avtobusa na liniji
+                for (int i = 0; i < postaje.length && postaje[i] != null; i++) {
+                    if (postaje[i].getID() == a.getTrenutnaPostaja().getID()) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index == -1) continue; // ne najdeno, preskoči
+
+                // Premik naprej ali nazaj
+                if (a.jeNaprej()) {
+                    if (index + 1 < postaje.length && postaje[index + 1] != null) {
+                        a.setTrenutnaPostaja(postaje[index + 1]);
+                    } else {
+                        // Obrne smer, gre nazaj
+                        a.obrniSmer();
+                        a.setTrenutnaPostaja(postaje[index - 1]);
+                    }
+                } else {
+                    if (index - 1 >= 0) {
+                        a.setTrenutnaPostaja(postaje[index - 1]);
+                    } else {
+                        // Obrne smer, gre naprej
+                        a.obrniSmer();
+                        a.setTrenutnaPostaja(postaje[index + 1]);
+                    }
+                }
+            }
+        }
+    }
+
+    static void izpisiPoNPremikih(int n) {
+        System.out.println("Zacetno stanje:");
+        izpisi(); // trenutna metoda, ki prikazuje stanje
+
+        naslednjeStanje();
+        System.out.println("\nStanje po " + n + " premikih");
+        izpisi();
+    }
+
+    static void casiPrihodov(int ID, int maxRazdalja) {
+        for (Linija linija : linije) {
+            if (linija == null) continue;
+
+            Postaja[] postaje = linija.getPostaje();
+            Avtobus[] avtobusi = linija.getAvtobusi();
+
+            int indexCiljne = -1;
+            for (int i = 0; i < postaje.length && postaje[i] != null; i++) {
+                if (postaje[i].getID() == ID) {
+                    indexCiljne = i;
+                    break;
+                }
+            }
+
+            if (indexCiljne == -1) continue; // Če postaje ni na liniji
+
+            for (Avtobus a : avtobusi) {
+                if (a == null || a.getTrenutnaPostaja() == null) continue;
+
+                int indexAvtobusa = -1;
+                for (int i = 0; i < postaje.length && postaje[i] != null; i++) {
+                    if (postaje[i].getID() == a.getTrenutnaPostaja().getID()) {
+                        indexAvtobusa = i;
+                        break;
+                    }
+                }
+
+                if (indexAvtobusa == -1) continue;
+
+                int razdalja = Math.abs(indexAvtobusa - indexCiljne);
+
+                if (razdalja <= maxRazdalja && razdalja > 0) {
+                    System.out.printf("Avtobus %d na liniji %d je %d postaj stran%n",
+                            a.getID(), linija.getSt(), razdalja);
+                }
+            }
+        }
+    }
+
+
+
 }
 
 class Postaja {
@@ -318,6 +415,19 @@ class Avtobus {
     public String toString() {
         return ID + " (" + steviloPotnikov + ") - " + (trenutnaPostaja != null ? trenutnaPostaja.getIme() : "null");
     }
+
+
+    //dodatek za delovanje tretje naloge
+    private boolean naprej = true; // true = naprej, false = nazaj
+
+    public boolean jeNaprej() {
+        return naprej;
+    }
+
+    public void obrniSmer() {
+        this.naprej = !this.naprej;
+    }
+
 }
 
 class Linija {
