@@ -27,8 +27,11 @@ public class DN09 {
         return null;
     }
 
-
     public static void main(String[] args) {
+
+        Map<Integer, Linija> mapaLinij = new HashMap<>();
+        List<Linija> seznamLinij = new ArrayList<>();
+
         try {
             Scanner sc = new Scanner(new File(args[0]));
             String[] stevila = sc.nextLine().split(",");
@@ -42,8 +45,8 @@ public class DN09 {
             avtobusi = new Avtobus[stAvtobusov];
 
             //drugi del linij
-            int indPostaj = 0;//indeksi
-            int indAvtobusov = 0;
+            int indPostaj = 0;//indeksPostaj
+            int indAvtobusov = 0;//inbdeksAvtobusov
 
             for (int i = 0; i < stPostaj; i++) {
 
@@ -54,6 +57,15 @@ public class DN09 {
                 int Y = Integer.parseInt(postajce[3]);
                 String [] linijeID = postajce[4].split(";");
 
+                for (String linijaStr : linijeID) {
+                    if (linijaStr.isEmpty()) continue;
+                    int linijaID = Integer.parseInt(linijaStr);
+                    if (!mapaLinij.containsKey(linijaID)) {
+                        Linija l = new Linija(linijaID);
+                        mapaLinij.put(linijaID, l);
+                        seznamLinij.add(l); // ključni del – ohranja vrstni red
+                    }
+                }
 
                 String [] avtobusiPodatki = postajce[5].split("[();]");
 
@@ -61,24 +73,27 @@ public class DN09 {
 
                 Postaja p = new Postaja(ID, ime, X, Y, cakajoci);
                 postaje[indPostaj++] = p;
+                if (avtobusiPodatki.length > 1) {
+                    for (int j = 0; j < avtobusiPodatki.length - 1; j ++) {
+                        // Preskoči prazne vrednosti
+                        if (avtobusiPodatki[j].trim().isEmpty() ||
+                                avtobusiPodatki[j + 1].trim().isEmpty()) {
+                            continue;
+                        }
 
-                for (int j = 0; j < avtobusiPodatki.length - 1; j++) {
-                    int IDavtobus = 0;
-                    int stPotnikov = 0;
-                    if (j % 2 == 0 && !avtobusiPodatki[j].isEmpty()) {
-                        IDavtobus = Integer.parseInt(avtobusiPodatki[j]);
-                    } else if (j % 2 == 1 && !avtobusiPodatki[j].isEmpty()) {
-                        stPotnikov = Integer.parseInt(avtobusiPodatki[j]);
-                    };
+                        int IDavtobus = Integer.parseInt(avtobusiPodatki[j].trim());
+                        int stPotnikov = Integer.parseInt(avtobusiPodatki[j + 1].trim());
 
-                    Avtobus obstaja = isciA(IDavtobus);
+                        Avtobus obstaja = isciA(IDavtobus);
+                        if (obstaja == null) {
+                            Avtobus a = new Avtobus(IDavtobus, stPotnikov);
+                            a.setTrenutnaPostaja(p);
+                            avtobusi[indAvtobusov++] = a;
+                        } else {
+                            obstaja.setSteviloPotnikov(stPotnikov);
+                            obstaja.setTrenutnaPostaja(p);
+                        }
 
-                    if (obstaja == null) {
-                        Avtobus a = new Avtobus(IDavtobus, stPotnikov);
-                        a.setTrenutnaPostaja(p);
-                        avtobusi[indAvtobusov++] = a;
-                    }else {
-                        obstaja.setTrenutnaPostaja(p);
                     }
                 }
             }
@@ -94,15 +109,21 @@ public class DN09 {
                 String [] IDPostaj = linija[3].split("\\|");
 
                 //natavljanje vrednosti
-                Linija l = new Linija(IDlinije);
+                Linija l = mapaLinij.get(IDlinije);
+                if (l == null) {
+                    // V varnostnem primeru, če linija še ni bila ustvarjena
+                    l = new Linija(IDlinije);
+                    mapaLinij.put(IDlinije, l);
+                    seznamLinij.add(l);
+                }
                 l.setBarva(barva);
 
                 //dodajanje avtobusov
-                for (int j = 0; j < IDAvtobusa.length ; j++) {
-                    if(IDAvtobusa[j] != null) {
-                        int IDavtobusa = Integer.parseInt(IDAvtobusa[j]);
+                for (String idStr : IDAvtobusa) {
+                    if (idStr != null && !idStr.isEmpty()) {
+                        int IDavtobusa = Integer.parseInt(idStr);
                         Avtobus a = isciA(IDavtobusa);
-                        if(a != null) {
+                        if (a != null) {
                             l.dodajAvtobus(a);
                         }
                     }
@@ -117,33 +138,59 @@ public class DN09 {
                         }
                     }
                 }
+                linije[indLinij++] = l;
             }
 
             sc.close();
-            izpisi();
+            linije = seznamLinij.toArray(new Linija[0]);
 
+            String ukaz = args[1];
+            //IZPISOVANJE
+            if (ukaz.equals("izpisi")) izpisi();
+            if (ukaz.equals("najblizja")){
+                //izpisi();
+            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
-
+    //1.IZPIS
     static void izpisi() {
         for (Linija l : linije) {
             if (l != null) {
                 System.out.print("Linija " + l.getID() + " - ");
                 Postaja[] p = l.getPostaje();
+                Avtobus[] avtobuski = l.getAvtobusi();
+
                 for (int i = 0; i < p.length && p[i] != null; i++) {
                     System.out.print(p[i].getIme());
-                    if (i != p.length - 1 && p[i + 1] != null) {
+
+                    // Preveri, ali je na tej postaji kak avtobus te linije
+                    boolean Bus = false;
+                    for (Avtobus a : avtobuski) {
+                        if (a != null && a.getTrenutnaPostaja() != null &&
+                                a.getTrenutnaPostaja().getID() == p[i].getID()) {
+                            Bus = true;
+                            break;
+                        }
+                    }
+
+                    if (Bus) {
+                        System.out.print(" (bus)");
+                    }
+                    if (i < p.length - 1 && p[i + 1] != null) {
                         System.out.print(" -> ");
                     }
                 }
+                System.out.println();
             }
-            System.out.println();
         }
+    }
+    //2.IZPIS
+    static void izpisNajboljObremenjenePostaje(int kapaciteta) {
+
+
     }
 
 
@@ -206,6 +253,10 @@ class Avtobus {
         return steviloPotnikov;
     }
 
+    public void setSteviloPotnikov(int steviloPotnikov) {
+        this.steviloPotnikov = steviloPotnikov;
+    }
+
     public Postaja getTrenutnaPostaja() {
         return trenutnaPostaja;
     }
@@ -265,6 +316,7 @@ class Linija {
         stPostaj++;
         return true;
     }
+
 
     boolean dodajAvtobus(Avtobus avtobus) {
         //preverjamo ce je vecje stevilo postaj od dolzine kamor jih zapisujemo
