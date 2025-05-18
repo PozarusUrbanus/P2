@@ -1,5 +1,6 @@
 package Domace_naloge;
 
+
 import edu.princeton.cs.algs4.StdDraw;
 
 public class DN06 {

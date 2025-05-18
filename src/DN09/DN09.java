@@ -97,7 +97,7 @@ public class DN09 {
                     }
                 }
             }
-            sc.nextLine();//PRAZNA LINIJA
+            sc.nextLine();//tista prazna vrstica
 
             int indLinij = 0;
 
@@ -147,9 +147,8 @@ public class DN09 {
             String ukaz = args[1];
             //IZPISOVANJE
             if (ukaz.equals("izpisi")) izpisi();
-            if (ukaz.equals("najblizja")){
-                //izpisi();
-            }
+            if (ukaz.equals("najboljObremenjena")) izpisNajboljObremenjenePostaje(Integer.parseInt(args[2]));
+
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -189,19 +188,71 @@ public class DN09 {
     }
     //2.IZPIS
     static void izpisNajboljObremenjenePostaje(int kapaciteta) {
+        Postaja najboljsa = null;
+        double najmanjseRazmerje = Double.MAX_VALUE;
+        int koncnaProstaMesta = 0;
+        int koncniCakajoci = 0;
 
+        for (Postaja p : postaje) {
+            if (p == null) continue;
+            int cakajoci = p.getCakajoci();
+            int dovoljMest = 0;
 
+            // Poišči vse linije, ki grejo čez to postajo
+            for (Linija l : linije) {
+
+                Postaja[] postaje = l.getPostaje();
+                Avtobus[] avtobuski = l.getAvtobusi();
+                boolean izvedljivo = false;
+
+                for (Postaja pa : postaje) {
+                    if (pa == null) continue;
+                    if (pa.getID() == p.getID()) {
+                        izvedljivo = true;
+                        break;
+                    }
+                }
+
+                if (izvedljivo) {
+                    for (Avtobus a : avtobuski) {
+                        if (a == null) continue;
+                        int stPotnikov = a.getSteviloPotnikov();
+                        int fraj = kapaciteta - stPotnikov;
+                        if (fraj < 0) fraj = 0;
+                        dovoljMest += fraj;
+                    }
+                }
+            }
+
+            double razmerje;
+            if (cakajoci != 0) {
+                razmerje = (double) dovoljMest / cakajoci;
+            } else {
+                razmerje = dovoljMest;
+            }
+
+            if (razmerje < najmanjseRazmerje || (razmerje == najmanjseRazmerje && p.getID() < najboljsa.getID())) {
+                najboljsa = p;
+                najmanjseRazmerje = razmerje;
+                koncnaProstaMesta = dovoljMest;
+                koncniCakajoci = cakajoci;
+            }
+        }
+
+        if (najboljsa != null) {
+            System.out.printf("Najbolj obremenjena postaja: %d %s%n", najboljsa.getID(), najboljsa.getIme());
+            System.out.printf(Locale.US, "Cakajoci: %d, Stevilo prostih mest: %d, Razmerje: %.2f", koncniCakajoci, koncnaProstaMesta, najmanjseRazmerje);
+        }
     }
-
-
+    //3.IZPIS
 }
 
 class Postaja {
-    private int ID;
-    private String ime;
-    private int x;
-    private int y;
-    private int cakajoci;
+    private final int ID;
+    private final String ime;
+    private final int x;
+    private final int y;
+    private final int cakajoci;
 
     //konstruktor
     public Postaja(int ID, String ime, int x, int y, int cakajoci) {
@@ -228,14 +279,13 @@ class Postaja {
         return cakajoci;
     }
 
-    @Override
     public String toString() {
         return ID + " " + ime + " [" + x + "," + y + "] cakajoci: " + cakajoci;
     }
 }
 
 class Avtobus {
-    private int ID;
+    private final int ID;
     private int steviloPotnikov;
     private Postaja trenutnaPostaja;
 
@@ -265,20 +315,19 @@ class Avtobus {
         this.trenutnaPostaja = postaja;
     }
 
-    @Override
     public String toString() {
         return ID + " (" + steviloPotnikov + ") - " + (trenutnaPostaja != null ? trenutnaPostaja.getIme() : "null");
     }
 }
 
 class Linija {
-    private int ID;
+    private final int ID;
     private String barva;
 
-    private Postaja[] postaje;
+    private final Postaja[] postaje;
     private int stPostaj;//stevilo postaj
 
-    private Avtobus[] avtobusi;
+    private final Avtobus[] avtobusi;
     private int stAvtobusov;//stevilo avtobusov
 
     public Linija(int ID) {
@@ -317,7 +366,6 @@ class Linija {
         return true;
     }
 
-
     boolean dodajAvtobus(Avtobus avtobus) {
         //preverjamo ce je vecje stevilo postaj od dolzine kamor jih zapisujemo
         if (stAvtobusov >= avtobusi.length) return false;
@@ -326,9 +374,7 @@ class Linija {
         return true;
     }
 
-    @Override
     public String toString() {
         return "Linija " + ID + " - " + postaje[0].getIme() + " -> " + postaje[1].getIme() + " (bus)";
     }
 }
-
